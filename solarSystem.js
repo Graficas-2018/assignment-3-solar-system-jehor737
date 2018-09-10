@@ -17,7 +17,7 @@ earthtextureMap,moontextureMap,marstextureMap,marsnormalMap,asteroidtextureMap,
 jupitertextureMap,saturntextureMap,saturnRingsMap,uranustextureMap,uranusRingsMap,
 neptunetextureMap,plutotextureMap,backgroundMesh,mercury = null,venus = null,earth = null,
 mars = null,jupiter = null,saturn = null,uranus = null,neptune = null,pluto = null,
-theSun=null,moonEarth = null, moonJupiter=null,moonMars1=null,moonMars2=null,asteroid,controls;
+theSun=null,moonEarth = null, moonJupiter=null,moonMars1=null,moonMars2=null,asteroids,orbits,controls,rot;
 var radiusSun=285,
 segments = 64,
 materialCircle,
@@ -32,7 +32,6 @@ distanceUranus = 1850, distanceNeptune = 2050, distancePluto=2200,distanceMoonEa
 var distancePlanets = [distanceMercury,distanceVenus,distanceEarth,distanceMars,distanceJupiter,distanceSaturn,distanceUranus,distanceNeptune, distancePluto];
 var duration = 8000; // ms
 var currentTime = Date.now();
-var pivotPoint,pivotPoint2,pivotPoint3,pivotPoint4,pivotPoint5,pivotPoint6,pivotPoint7,pivotPoint8,pivotPoint9,pivotPoint10,pivotPoint11;
 var animado = true;
 
 function onSpaceDown (event)
@@ -46,6 +45,7 @@ function onSpaceDown (event)
 
 function animate()
 {
+    rot=0.01;
     var count = 0;
     var now = Date.now();
     var deltat = now - currentTime;
@@ -55,33 +55,22 @@ function animate()
 
     if (animado) {
       theSun.rotation.y+=angle/5;
-      mercury.rotation.y+=angle;
-      venus.rotation.y+=angle;
-      earth.rotation.y+=angle;
-      moonEarth.rotation.y+=angle+1;
-      mars.rotation.y+=angle;
-      jupiter.rotation.y+=angle;
-      moonJupiter.rotation.y+=angle+1;
-      moonMars1.rotation.y+=angle+1;
-      moonMars2.rotation.y+=angle+1;
-      saturn.rotation.y+=angle;
-      uranus.rotation.y+=angle;
-      neptune.rotation.y+=angle;
-      pluto.rotation.y+=angle;
-      asteroid.rotation.z+=angle*0.1;
-      pivotPoint.rotation.y+=0.009;
-      pivotPoint2.rotation.y+=0.008;
-      pivotPoint3.rotation.y+=0.007;
-      pivotPoint4.rotation.y+=0.006;
-      pivotPoint5.rotation.y+=0.005;
-      pivotPoint6.rotation.y+=0.004;
-      pivotPoint7.rotation.y+=0.003;
-      pivotPoint8.rotation.y+=0.002;
-      pivotPoint9.rotation.y+=0.0009;
-      pivotPoint10.rotation.y+=0.07;
-      pivotPoint11.rotation.y+=0.07;
-      pivotPoint12.rotation.y+=0.07;
-      pivotPoint13.rotation.y+=0.07;
+      moonEarth.rotation.y+=angle;
+      moonJupiter.rotation.y+=angle;
+      moonMars1.rotation.y+=angle;
+      moonMars2.rotation.y+=angle;
+      pivotPoint10.rotation.y+=angle;
+      pivotPoint11.rotation.y+=angle;
+      pivotPoint12.rotation.y+=angle;
+      pivotPoint13.rotation.y+=angle;
+      for (var planet in planets) {
+        planets[planet].rotation.y+=angle;
+      }
+      for (var orbit in orbits.children) {
+        rot-=0.001;
+        orbits.children[orbit].rotation.z-= rot;
+      }
+      asteroids.rotation.y+=angle/8;
     }
 }
 
@@ -133,12 +122,25 @@ function createMaterials()
     materials["neptune"] = new THREE.MeshPhongMaterial({ map: neptunetextureMap});
     materials["pluto"] = new THREE.MeshPhongMaterial({ map: plutotextureMap});
     materials["asteroids"] = new THREE.MeshBasicMaterial({ map: asteroidtextureMap, side: THREE.DoubleSide, transparent: true, opacity: 0.5});
-    materials["sun"] = new THREE.MeshPhongMaterial({map: sunmap});
+    materials["sun"] = new THREE.MeshBasicMaterial({map: sunmap});
     materials["moonEarth"] = new THREE.MeshPhongMaterial({map: moontextureMap});
     materials["moonJupiter"] = new THREE.MeshPhongMaterial({map: moonJtextureMap});
     materials["moonMars1"] = new THREE.MeshPhongMaterial({map: moonM1textureMap});
     materials["moonMars2"] = new THREE.MeshPhongMaterial({map: moonM2textureMap});
 }
+
+function createAsteroid(parent) {
+  var asteroid = new THREE.Mesh(asteroidGeometry, materials["asteroids"]);
+  parent.add(asteroid);
+  var r = distanceMars+240;
+  var t = 2*Math.random() * Math.PI * 2;
+  var p = 0;
+  var x = r * Math.cos(t) * Math.cos(p);
+  var y = r * Math.sin(p);
+  var z = r * Math.sin(t) * Math.cos(p);
+  asteroid.position.set(x, y, z);
+}
+
 function createScene(canvas) {
     window.addEventListener('resize', function () {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -164,29 +166,15 @@ function createScene(canvas) {
     // Create a group to hold all the objects
     root = new THREE.Object3D;
     root.add(groupPlanets);
-    // Add a directional light to show off the object
-    //var light = new THREE.DirectionalLight( 0xffffff, 2);
     var sunLight = new THREE.PointLight(0xffffff, 4, 2000,2);
     sunLight.position.set(0,0,0);
-    light = new THREE.AmbientLight ( 0xffffff); // 0x222222 );
+    light = new THREE.AmbientLight ( 0x111111); // 0x222222 );
     root.add(light);
-    //light = new THREE.AmbientLight(0xff9900, 0.5);
-
     // Create all the materials
     createMaterials();
     //Set background
     scene.background = backgroundMesh;
     //Pivot points for rotations
-    pivotPoint = new THREE.Object3D;
-    pivotPoint1 = new THREE.Object3D;
-    pivotPoint2 = new THREE.Object3D;
-    pivotPoint3 = new THREE.Object3D;
-    pivotPoint4 = new THREE.Object3D;
-    pivotPoint5 = new THREE.Object3D;
-    pivotPoint6 = new THREE.Object3D;
-    pivotPoint7 = new THREE.Object3D;
-    pivotPoint8 = new THREE.Object3D;
-    pivotPoint9 = new THREE.Object3D;
     pivotPoint10 = new THREE.Object3D;
     pivotPoint11 = new THREE.Object3D;
     pivotPoint12 = new THREE.Object3D;
@@ -200,23 +188,12 @@ function createScene(canvas) {
     root.add(theSun);
     // And put the geometry and material together into a mesh
     sphere = new THREE.Mesh(geometry, materials["sun"]);
-    sphere.material.emissive = new THREE.Color(0x663d00);
-    sphere.material.emissive.intensity =0.0001;
     sphere.visible = true;
     theSun.add(sphere);
-
-    // Add for rotations
-    theSun.add(pivotPoint);
-    theSun.add(pivotPoint2);
-    theSun.add(pivotPoint3);
-    theSun.add(pivotPoint4);
-    theSun.add(pivotPoint5);
-    theSun.add(pivotPoint6);
-    theSun.add(pivotPoint7);
-    theSun.add(pivotPoint8);
-    theSun.add(pivotPoint9);
     theSun.position.set(0,0,0);
-    //theSun.add(sunLight);
+    // Material line
+    materialCircle = new THREE.LineBasicMaterial( { color: 0xffffff } );
+    orbits = new THREE.Object3D;
     for (var i = 0; i < radiusPlanets.length; i++) {
       planets[i] = new THREE.Object3D;
       // Create Planet
@@ -265,9 +242,18 @@ function createScene(canvas) {
       }
       sphere.visible = true;
       // Add the sphere mesh to our group
-      planets[i].add( sphere );
+      planets[i].add(sphere);
       planets[i].position.set(-distancePlanets[i],0,0);
+
+      geometryCircle = new THREE.CircleGeometry(distancePlanets[i], segments);
+      geometryCircle.vertices.shift();
+      orbit = new THREE.LineLoop(geometryCircle,materialCircle);
+      planets[i].rotation.x=-Math.PI/2;
+      orbit.rotation.x = Math.PI/2;
+      orbit.add(planets[i]);
+      orbits.add(orbit);
     }
+    //groupPlanets.add(orbits);
     //update planets
     mercury = planets[0];
     venus = planets[1];
@@ -278,19 +264,6 @@ function createScene(canvas) {
     uranus= planets[6];
     neptune = planets[7];
     pluto = planets[8];
-    pivotPoint.add(mercury);
-    pivotPoint2.add(venus);
-    pivotPoint3.add(earth);
-    earth.add(pivotPoint10);
-    pivotPoint4.add(mars);
-    mars.add(pivotPoint12);
-    mars.add(pivotPoint13);
-    pivotPoint5.add(jupiter);
-    pivotPoint6.add(saturn);
-    pivotPoint7.add(uranus);
-    pivotPoint8.add(neptune);
-    pivotPoint9.add(pluto);
-    jupiter.add(pivotPoint11);
     //Create Moon Earth
     moonEarth= new THREE.Object3D;
     geometry = new THREE.SphereGeometry(radiusMoonEarth, 20, 20);
@@ -301,7 +274,7 @@ function createScene(canvas) {
     moonEarth.add(sphere);
     moonEarth.position.set(distanceMoonEarth,0,0);
     earth.add(moonEarth);
-    pivotPoint10.add(moonEarth);
+    //pivotPoint10.add(moonEarth);
 
     //Create Moon Jupiter
     moonJupiter= new THREE.Object3D;
@@ -313,7 +286,7 @@ function createScene(canvas) {
     moonJupiter.add(sphere);
     moonJupiter.position.set(distanceMoonJupiter,0,0);
     jupiter.add(moonJupiter);
-    pivotPoint11.add(moonJupiter);
+    //pivotPoint11.add(moonJupiter);
 
     //Create Moon Mars
     moonMars1= new THREE.Object3D;
@@ -325,8 +298,7 @@ function createScene(canvas) {
     moonMars1.add(sphere);
     moonMars1.position.set(distanceMoonMars,0,0);
     mars.add(moonMars1);
-    pivotPoint12.add(moonMars1);
-
+    //pivotPoint12.add(moonMars1);
     //Create Moon Mars
     moonMars2= new THREE.Object3D;
     geometry = new THREE.SphereGeometry(radiusMoon2Mars, 20, 20);
@@ -336,24 +308,16 @@ function createScene(canvas) {
     // Add the sphere mesh to our group
     moonMars2.add(sphere);
     moonMars2.position.set(-distanceMoonMars,0,0);
-    jupiter.add(moonMars2);
-    pivotPoint13.add(moonMars2);
+    mars.add(moonMars2);
+    //pivotPoint13.add(moonMars2);
     //ASteroid belt
-    geometryRings = new THREE.RingGeometry(distanceJupiter-240,distanceMars+240,40, 5, Math.PI/2, Math.PI*2);
-    asteroid = new THREE.Mesh(geometryRings, materials["asteroids"]);
-    asteroid.visible=true;
-    asteroid.rotation.x=Math.PI/2;
-    root.add(asteroid);
-
-    // Material line
-    materialCircle = new THREE.LineBasicMaterial( { color: 0xffffff } );
-    //Orbits
-    for (var i = 0; i<distancePlanets.length; i++) {
-      geometryCircle = new THREE.CircleGeometry(distancePlanets[i], segments);
-      geometryCircle.vertices.shift();
-      orbit = new THREE.LineLoop(geometryCircle,materialCircle);
-      orbit.rotation.x = Math.PI/2;
-      root.add(orbit);
+    asteroids = new THREE.Object3D;
+    asteroidGeometry = new THREE.IcosahedronGeometry(10,0);
+    for (var i = 0; i <500; i++) {
+      createAsteroid(asteroids);
     }
+    root.add(asteroids);
+    root.add(groupPlanets);
+    root.add(orbits);
     scene.add(root);
 }
