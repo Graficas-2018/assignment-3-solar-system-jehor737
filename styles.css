@@ -1,0 +1,13 @@
+/*Jesús Horacio Rojas Cortés A01020026*/
+*{
+  padding: 0;
+  margin: 0;
+}
+
+#title {
+	position:absolute;
+  font-family: Verdana, Arial,sans-serif;
+	left:20px;
+	top:20px;
+  color: white;
+}
