@@ -166,10 +166,12 @@ function createScene(canvas) {
     root.add(groupPlanets);
     // Add a directional light to show off the object
     //var light = new THREE.DirectionalLight( 0xffffff, 2);
-    var sunLight = new THREE.PointLight(0xffcc00, 4, 2000,4 );
+    var sunLight = new THREE.PointLight(0xffffff, 4, 2000,2);
     sunLight.position.set(0,0,0);
-    light = new THREE.AmbientLight ( 0xffffff ); // 0x222222 );
+    light = new THREE.AmbientLight ( 0xffffff); // 0x222222 );
     root.add(light);
+    //light = new THREE.AmbientLight(0xff9900, 0.5);
+
     // Create all the materials
     createMaterials();
     //Set background
@@ -193,11 +195,16 @@ function createScene(canvas) {
     geometry = new THREE.SphereGeometry(radiusSun, 40, 40);
     // Create a group to hold the spheres
     theSun = new THREE.Object3D;
+    //theSun.add(light);
+    theSun.add(sunLight);
     root.add(theSun);
     // And put the geometry and material together into a mesh
     sphere = new THREE.Mesh(geometry, materials["sun"]);
+    sphere.material.emissive = new THREE.Color(0x663d00);
+    sphere.material.emissive.intensity =0.0001;
     sphere.visible = true;
     theSun.add(sphere);
+
     // Add for rotations
     theSun.add(pivotPoint);
     theSun.add(pivotPoint2);
@@ -209,7 +216,7 @@ function createScene(canvas) {
     theSun.add(pivotPoint8);
     theSun.add(pivotPoint9);
     theSun.position.set(0,0,0);
-    theSun.add(sunLight);
+    //theSun.add(sunLight);
     for (var i = 0; i < radiusPlanets.length; i++) {
       planets[i] = new THREE.Object3D;
       // Create Planet
@@ -332,7 +339,7 @@ function createScene(canvas) {
     jupiter.add(moonMars2);
     pivotPoint13.add(moonMars2);
     //ASteroid belt
-    geometryRings = new THREE.RingGeometry(distanceJupiter-120,distanceMars+120,40, 5, Math.PI/2, Math.PI*2);
+    geometryRings = new THREE.RingGeometry(distanceJupiter-240,distanceMars+240,40, 5, Math.PI/2, Math.PI*2);
     asteroid = new THREE.Mesh(geometryRings, materials["asteroids"]);
     asteroid.visible=true;
     asteroid.rotation.x=Math.PI/2;
